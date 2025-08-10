@@ -21,14 +21,20 @@ public class Affichage implements ActionListener {
     private JCheckBox jCBRandom = new JCheckBox("Au hasard");
     private JButton jBDemarrer = new JButton("Démarrer");
 
+    private boolean enCours = false;
+
     private int bpm = 0;
-    private int silence = 0;
+    private int silence = -1;
     private boolean random = false;
+    private Metronome metronome = new Metronome();
 
     public Affichage () {
         init();
     }
 
+    /**
+     * Initialisation et demarrage de l'affichage du menu.
+     */
     public void init() {
         fenetre.setLayout(new BorderLayout());
         fenetre.setBounds(400, 400, 900, 225);
@@ -60,6 +66,8 @@ public class Affichage implements ActionListener {
 
         fenetre.add(panelHaut, BorderLayout.NORTH);
         fenetre.add(panelMilieu, BorderLayout.CENTER);
+
+        jBDemarrer.setBackground(Color.getHSBColor(0.33f, 1.0f, 0.66f));
         fenetre.add(jBDemarrer, BorderLayout.SOUTH);
         fenetre.setVisible(true);
 //ajout des ecouteurs
@@ -67,16 +75,77 @@ public class Affichage implements ActionListener {
         jBDemarrer.addActionListener(this);
     }
 
+    /**
+     * Gestion des evenements de l'utilisateur.
+     *
+     * @param e the event to be processed
+     */
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == jCBRandom) {
             random = !random;
+            silence = -1;
             jTFSilence.setEditable(!random);
         } else {    //bouton demarrer
-            demarrer();
+            if(!enCours) {
+                enCours = true;
+                jBDemarrer.setBackground(Color.getHSBColor(0.00f, 1.0f, 0.66f));
+                jBDemarrer.setText("Stop");
+                demarrer();
+            } else {
+                enCours = false;
+                jBDemarrer.setBackground(Color.getHSBColor(0.33f, 1.0f, 0.66f));
+                jBDemarrer.setText("Démarrer");
+                metronome.stop();
+            }
         }
     }
 
+    /**
+     * Initialisation des variables.
+     */
     private void demarrer() {
+        if (validerDonnees()) {
+            bpm = Integer.parseInt(jTFBpm.getText());
+            if (!random) {
+                silence = Integer.parseInt(jTFSilence.getText());
+            }
 
+            metronome.setTempsBattement(bpm);
+            metronome.setToursSilence(silence);
+
+            Runnable runMetronome = () -> metronome.lancer();
+            new Thread(runMetronome).start();
+        }
+    }
+
+    private boolean validerDonnees () {
+        boolean valide = false;
+        try {
+            if (Integer.parseInt(jTFBpm.getText()) < 0) {
+                JOptionPane.showMessageDialog(fenetre, MSG_ERR, "ERREUR",
+                        JOptionPane.ERROR_MESSAGE);
+                jTFBpm.setText("0");
+            } else if (!random && Integer.parseInt(jTFSilence.getText()) < 0) {
+                JOptionPane.showMessageDialog(fenetre, MSG_ERR, "ERREUR",
+                        JOptionPane.ERROR_MESSAGE);
+                jTFSilence.setText("0");
+            } else {
+                valide = true;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(fenetre, MSG_ERR, "ERREUR",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+
+        return valide;
+    }
+
+    /**
+     * Programme principal
+     *
+     * @param args
+     */
+    public static void main(String[] args) {
+        Affichage menu = new Affichage();
     }
 }
