@@ -1,9 +1,12 @@
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static java.lang.Thread.sleep;
 
 public class Metronome {
 
@@ -20,11 +23,9 @@ public class Metronome {
     private boolean aleatoire;
 
     //Variables pour la gestion du son
-    private File sonBattement;
     private AudioInputStream audioStream;
-    private AudioFormat audioFormat;
-    private DataLine.Info info;
     private Clip clipAudio;
+    private float volume;
 
     private ScheduledExecutorService synchroniseur; //Synchroniseur du metronome
 
@@ -33,9 +34,9 @@ public class Metronome {
     //-----------------------------------
     /**
      * Constructeur de la classe Metronome sans attribut.
-     *
      * Initialise
      *  - les temps de battement a 0
+     *  - le nombre de battements sonores a 1
      *  - le nombre de battements silencieux a 0
      *  - aleatoire a false
      */
@@ -58,28 +59,12 @@ public class Metronome {
     }
 
     /**
-     * Retourne le nombre de millisecondes entre chaque battement.
-     * @return le nombre de millisecondes entre chaque battement.
-     */
-    public int getTempsBattement() {
-        return tempsBattement;
-    }
-
-    /**
      * Permet de modifier le nombre de battements qui seront silencieux avant
      * de jouer un battement sonore.
      * @param toursSkip le nombre de battements silencieux.
      */
     public void setToursSilence(int toursSkip) {
         this.toursSilence = toursSkip;
-    }
-
-    /**
-     * Retourne le nombre de battements silencieux entre chaque battement sonore.
-     * @return le nombre de battements silencieux.
-     */
-    public int getToursSilence() {
-        return toursSilence;
     }
 
     /**
@@ -92,17 +77,17 @@ public class Metronome {
     }
 
     /**
-     * Retourne true si le nombre de battements silencieux est aleatoire.
-     * @return true si le nombre de battements silencieux est aleatoire, false sinon.
-     */
-    public boolean isAleatoire() {
-        return aleatoire;
-    }
-
-    /**
      * Methode pour demarre l'emission de battements selon les parametres donnes.
      */
     public void lancer(){
+        File sonBattement;
+        AudioFormat audioFormat;
+        DataLine.Info info;
+
+        int toursSonores = 1;
+        boolean sonore = true;
+        Random random = new Random();
+
         //Preparation du son du metronome
         try {
             sonBattement = new File("metronome.wav");
@@ -120,11 +105,42 @@ public class Metronome {
         }
 
         Runnable runMetronome = () -> {
-            clipAudio.setFramePosition(0); // Rembobiner au début
-            clipAudio.start();};
+                clipAudio.setFramePosition(0); // Rembobiner au début
+                clipAudio.start();
+        };
 
         synchroniseur = Executors.newSingleThreadScheduledExecutor();
         synchroniseur.scheduleAtFixedRate(runMetronome, 0, tempsBattement, TimeUnit.MILLISECONDS);
+
+        if (toursSilence > 0 || aleatoire) {
+            int i = 3;
+            while (!synchroniseur.isShutdown()) {
+                if (i == 0) {
+                    if (sonore) {
+                        baisserVolume();
+                        if (aleatoire) {
+                            toursSilence = random.nextInt(2,10);
+                        }
+                        i = toursSilence;
+                        sonore = false;
+                    } else {
+                        monterVolume();
+                        if (aleatoire) {
+                            toursSonores = random.nextInt(2,10);
+                        }
+                        i = toursSonores;
+                        sonore = true;
+                    }
+                }
+                i--;
+                try {
+                    sleep(tempsBattement);
+                } catch (InterruptedException e){
+                    System.out.println("Interruption inattendue");
+                }
+            }
+        }
+
     }
 
     /**
@@ -171,6 +187,34 @@ public class Metronome {
                 System.out.println("Erreur lors de la fermeture du flux audio.");
             }
             audioStream = null;
+        }
+    }
+
+    /**
+     * Permet de baisser le volume du metronome au minimum (silencieux) si le systeme le permet.
+     */
+    public void baisserVolume() {
+        if (clipAudio.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+            FloatControl gainControl = (FloatControl) clipAudio.getControl(FloatControl.Type.MASTER_GAIN);
+            // Sauvegarder le volume actuel
+            volume = gainControl.getValue();
+            // Mettre au minimum (silencieux)
+            gainControl.setValue(gainControl.getMinimum());
+        } else {
+            System.out.println("Contrôle du gain non supporté");
+        }
+    }
+
+    /**
+     * Permet de remettre le volume du metronome au niveau original.
+     */
+    public void monterVolume() {
+        if (clipAudio.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+            FloatControl gainControl = (FloatControl) clipAudio.getControl(FloatControl.Type.MASTER_GAIN);
+            // Remettre au volume original
+            gainControl.setValue(volume);
+        } else {
+            System.out.println("Contrôle du gain non supporté");
         }
     }
 }

@@ -4,10 +4,14 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class Affichage implements ActionListener {
-    //Constantes
+    //-----------------------------------
+    // CONSTANTES DE CLASSE
+    //-----------------------------------
     private final String MSG_ERR = "Vous devez entrer un nombre positif.";
 
-    //Attributs d'instance
+    //-----------------------------------
+    // ATTRIBUTS D'INSTANCE
+    //-----------------------------------
     private JFrame fenetre = new JFrame();
     private JPanel panelHaut = new JPanel(new FlowLayout());
     private JPanel panelMilieu = new JPanel(new FlowLayout());
@@ -23,12 +27,21 @@ public class Affichage implements ActionListener {
 
     private boolean enCours = false;
 
-    private int bpm = 0;
-    private int silence = -1;
-    private boolean random = false;
-    private Metronome metronome = new Metronome();
+    private boolean aleatoire;
+    private Metronome metronome;
 
+    //-----------------------------------
+    // CONSTRUCTEUR
+    //-----------------------------------
+
+    /**
+     * Constructeur de la classe d'affichage.
+     * Initialise l'objet Metronome.
+     * Initialise et demarre l'affichage du programme.
+     */
     public Affichage () {
+        aleatoire = false;
+        metronome = new Metronome();
         init();
     }
 
@@ -70,7 +83,8 @@ public class Affichage implements ActionListener {
         jBDemarrer.setBackground(Color.getHSBColor(0.33f, 1.0f, 0.66f));
         fenetre.add(jBDemarrer, BorderLayout.SOUTH);
         fenetre.setVisible(true);
-//ajout des ecouteurs
+
+        //ajout des ecouteurs
         jCBRandom.addActionListener(this);
         jBDemarrer.addActionListener(this);
     }
@@ -82,16 +96,17 @@ public class Affichage implements ActionListener {
      */
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == jCBRandom) {
-            random = !random;
-            silence = -1;
-            jTFSilence.setEditable(!random);
+            aleatoire = !aleatoire;
+            jTFSilence.setEditable(!aleatoire);
         } else {    //bouton demarrer
+            //Si le programme n'est pas en mode d'emission de battements
             if(!enCours) {
                 enCours = true;
                 jBDemarrer.setBackground(Color.getHSBColor(0.00f, 1.0f, 0.66f));
                 jBDemarrer.setText("Stop");
                 demarrer();
             } else {
+            //Si le programme est en mode d'emission de battements
                 enCours = false;
                 jBDemarrer.setBackground(Color.getHSBColor(0.33f, 1.0f, 0.66f));
                 jBDemarrer.setText("Démarrer");
@@ -101,23 +116,32 @@ public class Affichage implements ActionListener {
     }
 
     /**
-     * Initialisation des variables.
+     * Initialisation des variables de l'objet Metronome
+     * et lancement de l'emission des battements..
      */
     private void demarrer() {
+        int bpm = 0;
+        int silence = 0;
+
         if (validerDonnees()) {
             bpm = Integer.parseInt(jTFBpm.getText());
-            if (!random) {
+            if (!aleatoire) {
                 silence = Integer.parseInt(jTFSilence.getText());
             }
 
             metronome.setTempsBattement(bpm);
             metronome.setToursSilence(silence);
+            metronome.setAleatoire(aleatoire);
 
             Runnable runMetronome = () -> metronome.lancer();
             new Thread(runMetronome).start();
         }
     }
 
+    /**
+     * Valide que les parametres du metronome sont des valeurs valides.
+     * @return true si les parametres sont valides, false sinon
+     */
     private boolean validerDonnees () {
         boolean valide = false;
         try {
@@ -125,7 +149,7 @@ public class Affichage implements ActionListener {
                 JOptionPane.showMessageDialog(fenetre, MSG_ERR, "ERREUR",
                         JOptionPane.ERROR_MESSAGE);
                 jTFBpm.setText("0");
-            } else if (!random && Integer.parseInt(jTFSilence.getText()) < 0) {
+            } else if (!aleatoire && Integer.parseInt(jTFSilence.getText()) < 0) {
                 JOptionPane.showMessageDialog(fenetre, MSG_ERR, "ERREUR",
                         JOptionPane.ERROR_MESSAGE);
                 jTFSilence.setText("0");
@@ -142,10 +166,8 @@ public class Affichage implements ActionListener {
 
     /**
      * Programme principal
-     *
-     * @param args
      */
     public static void main(String[] args) {
-        Affichage menu = new Affichage();
+        new Affichage();
     }
 }
