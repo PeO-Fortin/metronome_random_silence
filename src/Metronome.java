@@ -1,13 +1,22 @@
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
+
 import java.util.Random;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Thread.sleep;
 
+/**
+ * Cette classe modelise et gere le metronome.
+ *
+ * @author Pierre-Olivier Fortin
+ * @since 11 aout 2025
+ * @version 1.00
+ */
 public class Metronome {
 
     //-----------------------------------
@@ -84,10 +93,6 @@ public class Metronome {
         AudioFormat audioFormat;
         DataLine.Info info;
 
-        int toursSonores = 1;
-        boolean sonore = true;
-        Random random = new Random();
-
         //Preparation du son du metronome
         try {
             sonBattement = new File("metronome.wav");
@@ -113,32 +118,7 @@ public class Metronome {
         synchroniseur.scheduleAtFixedRate(runMetronome, 0, tempsBattement, TimeUnit.MILLISECONDS);
 
         if (toursSilence > 0 || aleatoire) {
-            int i = 3;
-            while (!synchroniseur.isShutdown()) {
-                if (i == 0) {
-                    if (sonore) {
-                        baisserVolume();
-                        if (aleatoire) {
-                            toursSilence = random.nextInt(2,10);
-                        }
-                        i = toursSilence;
-                        sonore = false;
-                    } else {
-                        monterVolume();
-                        if (aleatoire) {
-                            toursSonores = random.nextInt(2,10);
-                        }
-                        i = toursSonores;
-                        sonore = true;
-                    }
-                }
-                i--;
-                try {
-                    sleep(tempsBattement);
-                } catch (InterruptedException e){
-                    System.out.println("Interruption inattendue");
-                }
-            }
+            gestionDesSilences();
         }
 
     }
@@ -187,6 +167,43 @@ public class Metronome {
                 System.out.println("Erreur lors de la fermeture du flux audio.");
             }
             audioStream = null;
+        }
+    }
+
+    /**
+     * Cette methode permet d'integrer un nombre de battements silencieux,
+     * selon les parametres indiques par l'utilisateur.
+     */
+    private void gestionDesSilences() {
+        int toursSonores = 1;
+        boolean sonore = true;
+        Random random = new Random();
+        int i = 3;
+
+        while (!synchroniseur.isShutdown()) {
+            if (i == 0) {
+                if (sonore) {
+                    baisserVolume();
+                    if (aleatoire) {
+                        toursSilence = random.nextInt(2,10);
+                    }
+                    i = toursSilence;
+                    sonore = false;
+                } else {
+                    monterVolume();
+                    if (aleatoire) {
+                        toursSonores = random.nextInt(2,10);
+                    }
+                    i = toursSonores;
+                    sonore = true;
+                }
+            }
+            i--;
+            try {
+                sleep(tempsBattement);
+            } catch (InterruptedException e){
+                System.out.println("Interruption inattendue");
+            }
         }
     }
 

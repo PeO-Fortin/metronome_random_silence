@@ -3,6 +3,13 @@ import javax.swing.plaf.metal.MetalCheckBoxIcon;
 import java.awt.*;
 import java.awt.event.*;
 
+/**
+ * Affichage : Cette classe gère l'affichage du menu et les actions utilisateurs.
+ *
+ * @author Pierre-Olivier Fortin
+ * @since 11 aout 2025
+ * @version 1.00
+ */
 public class Affichage implements ActionListener {
     //-----------------------------------
     // CONSTANTES DE CLASSE
@@ -162,12 +169,5 @@ public class Affichage implements ActionListener {
         }
 
         return valide;
-    }
-
-    /**
-     * Programme principal
-     */
-    public static void main(String[] args) {
-        new Affichage();
     }
 }
