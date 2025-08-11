@@ -1,3 +1,5 @@
+package main;
+
 import javax.swing.*;
 import javax.swing.plaf.metal.MetalCheckBoxIcon;
 import java.awt.*;

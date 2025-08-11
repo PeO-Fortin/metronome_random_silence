@@ -1,3 +1,5 @@
+package main;
+
 /**
  * Programme principal : Cette classe lance le menu principal.
  *

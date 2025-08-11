@@ -1,3 +1,5 @@
+package main;
+
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +25,7 @@ public class Metronome {
     // CONSTANTES DE CLASSE
     //-----------------------------------
     public static final int MILLI_PAR_MINUTE = 60000;
+    public static final String PATH_SON = "src/resources/metronome.wav";
 
     //-----------------------------------
     // ATTRIBUTS D'INSTANCE
@@ -95,7 +98,7 @@ public class Metronome {
 
         //Preparation du son du metronome
         try {
-            sonBattement = new File("metronome.wav");
+            sonBattement = new File(PATH_SON);
             audioStream = AudioSystem.getAudioInputStream(sonBattement);
             audioFormat = audioStream.getFormat();
             info = new DataLine.Info(Clip.class, audioFormat);
