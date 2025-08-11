@@ -1,8 +1,9 @@
 package main;
 
 import javax.sound.sampled.*;
-import java.io.File;
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import java.util.Random;
 
@@ -25,7 +26,6 @@ public class Metronome {
     // CONSTANTES DE CLASSE
     //-----------------------------------
     public static final int MILLI_PAR_MINUTE = 60000;
-    public static final String PATH_SON = "src/resources/metronome.wav";
 
     //-----------------------------------
     // ATTRIBUTS D'INSTANCE
@@ -92,18 +92,24 @@ public class Metronome {
      * Methode pour demarre l'emission de battements selon les parametres donnes.
      */
     public void lancer(){
-        File sonBattement;
         AudioFormat audioFormat;
         DataLine.Info info;
 
         //Preparation du son du metronome
         try {
-            sonBattement = new File(PATH_SON);
-            audioStream = AudioSystem.getAudioInputStream(sonBattement);
-            audioFormat = audioStream.getFormat();
-            info = new DataLine.Info(Clip.class, audioFormat);
-            clipAudio = (Clip) AudioSystem.getLine(info);
-            clipAudio.open(audioStream);
+            InputStream sonBattement = getClass().getResourceAsStream("/metronome.wav");
+            if (sonBattement == null) {
+                System.out.println("Fichier audio introuvable dans les ressources.");
+                return;
+            }
+
+            try (BufferedInputStream bufSonBattement = new BufferedInputStream(sonBattement)) {
+                audioStream = AudioSystem.getAudioInputStream(bufSonBattement);
+                audioFormat = audioStream.getFormat();
+                info = new DataLine.Info(Clip.class, audioFormat);
+                clipAudio = (Clip) AudioSystem.getLine(info);
+                clipAudio.open(audioStream);
+            }
         } catch (UnsupportedAudioFileException e) {
             System.out.println("Fichier audio de format incorrect.");
         } catch (IOException e) {
@@ -123,7 +129,6 @@ public class Metronome {
         if (toursSilence > 0 || aleatoire) {
             gestionDesSilences();
         }
-
     }
 
     /**
