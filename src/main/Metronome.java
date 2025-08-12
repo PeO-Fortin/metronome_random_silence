@@ -97,7 +97,7 @@ public class Metronome {
 
         //Preparation du son du metronome
         try {
-            InputStream sonBattement = getClass().getResourceAsStream("/metronome.wav");
+            InputStream sonBattement = getClass().getResourceAsStream("metronome.wav");
             if (sonBattement == null) {
                 System.out.println("Fichier audio introuvable dans les ressources.");
                 return;
@@ -135,7 +135,9 @@ public class Metronome {
      * Methode pour arreter le metronome.
      */
     public void stop(){
-        synchroniseur.shutdown();
+        if (synchroniseur != null) {
+            synchroniseur.shutdown();
+        }
         nettoyerRessources();
     }
 

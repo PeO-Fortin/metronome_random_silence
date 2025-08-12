@@ -154,7 +154,7 @@ public class Affichage implements ActionListener {
     private boolean validerDonnees () {
         boolean valide = false;
         try {
-            if (Integer.parseInt(jTFBpm.getText()) < 0) {
+            if (Integer.parseInt(jTFBpm.getText()) <= 0) {
                 JOptionPane.showMessageDialog(fenetre, MSG_ERR, "ERREUR",
                         JOptionPane.ERROR_MESSAGE);
                 jTFBpm.setText("0");
