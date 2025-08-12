@@ -26,6 +26,7 @@ public class Metronome {
     // CONSTANTES DE CLASSE
     //-----------------------------------
     public static final int MILLI_PAR_MINUTE = 60000;
+    public static final String CHEMIN = "metronome.wav";
 
     //-----------------------------------
     // ATTRIBUTS D'INSTANCE
@@ -97,7 +98,7 @@ public class Metronome {
 
         //Preparation du son du metronome
         try {
-            InputStream sonBattement = getClass().getResourceAsStream("metronome.wav");
+            InputStream sonBattement = getClass().getResourceAsStream(CHEMIN);
             if (sonBattement == null) {
                 System.out.println("Fichier audio introuvable dans les ressources.");
                 return;
