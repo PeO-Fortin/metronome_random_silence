@@ -12,7 +12,7 @@ import java.awt.event.*;
  * @since 11 aout 2025
  * @version 1.00
  */
-public class Affichage implements ActionListener {
+public class Affichage extends JFrame implements ActionListener {
     //-----------------------------------
     // CONSTANTES DE CLASSE
     //-----------------------------------
@@ -21,9 +21,10 @@ public class Affichage implements ActionListener {
     //-----------------------------------
     // ATTRIBUTS D'INSTANCE
     //-----------------------------------
-    private JFrame fenetre = new JFrame();
-    private JPanel panelHaut = new JPanel(new FlowLayout());
-    private JPanel panelMilieu = new JPanel(new FlowLayout());
+    private JPanel fenetre = new JPanel();
+    private JPanel panelBpm = new JPanel(new FlowLayout());
+    private JPanel panelSilencieux = new JPanel(new FlowLayout());
+    private JPanel panelRandomOptions = new JPanel(new FlowLayout());
 
     private JLabel jLBpm = new JLabel("BPM");
     private JTextField jTFBpm = new JTextField("0",3);
@@ -31,7 +32,13 @@ public class Affichage implements ActionListener {
     private JLabel jLSilence = new JLabel("Nombre de BPM silencieux");
     private JTextField jTFSilence = new JTextField("0",3);
 
-    private JCheckBox jCBRandom = new JCheckBox("Au hasard");
+    private JCheckBox jCBRandom = new JCheckBox("Aléatoire");
+    private JLabel jLOptRandom = new JLabel("Options pour l'aéatoire:");
+    private JLabel jLOptRandomMin = new JLabel("Min");
+    private JLabel jLOptRandomMax = new JLabel("Max");
+    JTextField jTFOptionsRandomMin = new JTextField("3",3);
+    JTextField jTFOptionsRandomMax = new JTextField("10",3);
+
     private JButton jBDemarrer = new JButton("Démarrer");
 
     private boolean enCours = false;
@@ -58,40 +65,66 @@ public class Affichage implements ActionListener {
      * Initialisation et demarrage de l'affichage du menu.
      */
     public void init() {
-        fenetre.setLayout(new BorderLayout());
-        fenetre.setBounds(400, 400, 900, 225);
-        fenetre.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        fenetre.setTitle("Metronome");
-        jCBRandom.setSelected(false);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Configuration du bouton Fermer
+        setTitle("Metronome"); // Nom de la fenetre
 
+        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS)); // Type de fenetre
+
+        jCBRandom.setSelected(false); // Random a false par defaut
+
+        // Construction du panel pour le BPM
         jLBpm.setFont(new Font("Arial", Font.BOLD, 32));
         jTFBpm.setFont(new Font("Arial", Font.BOLD, 32));
-        panelHaut.add(jLBpm);
-        panelHaut.add(jTFBpm);
+        panelBpm.add(jLBpm);
+        panelBpm.add(jTFBpm);
 
-
+        // Construction du panel pour le controle des silences
         jLSilence.setFont(new Font("Arial", Font.BOLD, 32));
         jTFSilence.setFont(new Font("Arial", Font.BOLD, 32));
-        panelMilieu.add(jLSilence);
-        panelMilieu.add(jTFSilence);
         jCBRandom.setFont(new Font("Arial", Font.BOLD, 32));
         jCBRandom.setIcon(new MetalCheckBoxIcon() {
-                              @Override
-                              protected int getControlSize() {
-                                  return 32; // Set desired size
-                              }
-                          });
-        panelMilieu.add(Box.createHorizontalStrut(20));
-        panelMilieu.add(jCBRandom);
+            @Override
+            protected int getControlSize() {
+                return 32; // Set desired size
+            }
+        });
+        panelSilencieux.add(jLSilence);
+        panelSilencieux.add(jTFSilence);
+        panelSilencieux.add(Box.createHorizontalStrut(20));
+        panelSilencieux.add(jCBRandom);
 
+        // Construction du panel pour la configuration de l'aleatoire
+        jLOptRandom.setFont(new Font("Arial", Font.BOLD, 32));
+        jLOptRandomMin.setFont(new Font("Arial", Font.BOLD, 32));
+        jLOptRandomMax.setFont(new Font("Arial", Font.BOLD, 32));
+        jTFOptionsRandomMin.setFont(new Font("Arial", Font.BOLD, 32));
+        jTFOptionsRandomMax.setFont(new Font("Arial", Font.BOLD, 32));
+        jTFOptionsRandomMin.setEditable(aleatoire);
+        jTFOptionsRandomMax.setEditable(aleatoire);
+        panelRandomOptions.add(jLOptRandom);
+        panelRandomOptions.add(Box.createHorizontalStrut(20));
+        panelRandomOptions.add(jLOptRandomMin);
+        panelRandomOptions.add(jTFOptionsRandomMin);
+        panelRandomOptions.add(Box.createHorizontalStrut(20));
+        panelRandomOptions.add(jLOptRandomMax);
+        panelRandomOptions.add(jTFOptionsRandomMax);
+
+
+        // Configuration de l'apparence du bouton demarrer
         jBDemarrer.setFont(new Font("Arial", Font.BOLD, 32));
-
-        fenetre.add(panelHaut, BorderLayout.NORTH);
-        fenetre.add(panelMilieu, BorderLayout.CENTER);
-
         jBDemarrer.setBackground(Color.getHSBColor(0.33f, 1.0f, 0.66f));
-        fenetre.add(jBDemarrer, BorderLayout.SOUTH);
-        fenetre.setVisible(true);
+
+        //Construction de la fenetre
+        fenetre.add(panelBpm);
+        fenetre.add(panelSilencieux);
+        fenetre.add(panelRandomOptions);
+        fenetre.add(jBDemarrer);
+
+        add(fenetre);
+        setSize(900,300);
+        setLocationRelativeTo(null);
+
+        setVisible(true);
 
         //ajout des ecouteurs
         jCBRandom.addActionListener(this);
