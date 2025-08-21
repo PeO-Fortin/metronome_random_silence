@@ -35,7 +35,7 @@ public class Affichage extends JFrame implements ActionListener {
     private JTextField jTFSilence = new JTextField("0",3);
 
     private JCheckBox jCBRandom = new JCheckBox("Aléatoire");
-    private JLabel jLOptRandom = new JLabel("Options pour l'aéatoire:");
+    private JLabel jLOptRandom = new JLabel("Options pour l'aléatoire:");
     private JLabel jLOptRandomMin = new JLabel("Min");
     private JLabel jLOptRandomMax = new JLabel("Max");
     JTextField jTFOptionsRandomMin = new JTextField(MIN_RANDOM_DEFAUT,3);
