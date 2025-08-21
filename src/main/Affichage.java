@@ -9,14 +9,16 @@ import java.awt.event.*;
  * Affichage : Cette classe gère l'affichage du menu et les actions utilisateurs.
  *
  * @author Pierre-Olivier Fortin
- * @since 11 aout 2025
- * @version 1.00
+ * @since 21 aout 2025
+ * @version 1.10
  */
 public class Affichage extends JFrame implements ActionListener {
     //-----------------------------------
     // CONSTANTES DE CLASSE
     //-----------------------------------
-    private final String MSG_ERR = "Vous devez entrer un nombre positif.";
+    private final static String MSG_ERR = "Vous devez entrer un nombre positif.";
+    private final static String MIN_RANDOM_DEFAUT = "2";
+    private final static String MAX_RANDOM_DEFAUT = "10";
 
     //-----------------------------------
     // ATTRIBUTS D'INSTANCE
@@ -36,8 +38,8 @@ public class Affichage extends JFrame implements ActionListener {
     private JLabel jLOptRandom = new JLabel("Options pour l'aéatoire:");
     private JLabel jLOptRandomMin = new JLabel("Min");
     private JLabel jLOptRandomMax = new JLabel("Max");
-    JTextField jTFOptionsRandomMin = new JTextField("3",3);
-    JTextField jTFOptionsRandomMax = new JTextField("10",3);
+    JTextField jTFOptionsRandomMin = new JTextField(MIN_RANDOM_DEFAUT,3);
+    JTextField jTFOptionsRandomMax = new JTextField(MAX_RANDOM_DEFAUT,3);
 
     private JButton jBDemarrer = new JButton("Démarrer");
 
@@ -140,6 +142,8 @@ public class Affichage extends JFrame implements ActionListener {
         if (e.getSource() == jCBRandom) {
             aleatoire = !aleatoire;
             jTFSilence.setEditable(!aleatoire);
+            jTFOptionsRandomMin.setEditable(aleatoire);
+            jTFOptionsRandomMax.setEditable(aleatoire);
         } else {    //bouton demarrer
             //Si le programme n'est pas en mode d'emission de battements
             if(!enCours) {
@@ -159,21 +163,28 @@ public class Affichage extends JFrame implements ActionListener {
 
     /**
      * Initialisation des variables de l'objet Metronome
-     * et lancement de l'emission des battements..
+     * et lancement de l'emission des battements.
      */
     private void demarrer() {
         int bpm = 0;
         int silence = 0;
+        int minRandom = Integer.parseInt(MIN_RANDOM_DEFAUT);
+        int maxRandom = Integer.parseInt(MAX_RANDOM_DEFAUT);
 
         if (validerDonnees()) {
             bpm = Integer.parseInt(jTFBpm.getText());
             if (!aleatoire) {
                 silence = Integer.parseInt(jTFSilence.getText());
+            } else {
+                minRandom = Integer.parseInt(jTFOptionsRandomMin.getText());
+                maxRandom = Integer.parseInt(jTFOptionsRandomMax.getText());
             }
 
             metronome.setTempsBattement(bpm);
             metronome.setToursSilence(silence);
             metronome.setAleatoire(aleatoire);
+            metronome.setMinRandom(minRandom);
+            metronome.setMaxRandom(maxRandom);
 
             Runnable runMetronome = () -> metronome.lancer();
             new Thread(runMetronome).start();
@@ -195,6 +206,13 @@ public class Affichage extends JFrame implements ActionListener {
                 JOptionPane.showMessageDialog(fenetre, MSG_ERR, "ERREUR",
                         JOptionPane.ERROR_MESSAGE);
                 jTFSilence.setText("0");
+            } else if (aleatoire &&
+                    (Integer.parseInt(jTFOptionsRandomMin.getText()) < 0 ||
+                            Integer.parseInt(jTFOptionsRandomMax.getText()) < 0)) {
+                JOptionPane.showMessageDialog(fenetre, MSG_ERR, "ERREUR",
+                        JOptionPane.ERROR_MESSAGE);
+                jTFOptionsRandomMin.setText(MIN_RANDOM_DEFAUT);
+                jTFOptionsRandomMax.setText(MAX_RANDOM_DEFAUT);
             } else {
                 valide = true;
             }

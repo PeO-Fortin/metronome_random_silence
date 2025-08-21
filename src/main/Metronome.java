@@ -17,8 +17,8 @@ import static java.lang.Thread.sleep;
  * Cette classe modelise et gere le metronome.
  *
  * @author Pierre-Olivier Fortin
- * @since 11 aout 2025
- * @version 1.00
+ * @since 21 aout 2025
+ * @version 1.10
  */
 public class Metronome {
 
@@ -27,6 +27,7 @@ public class Metronome {
     //-----------------------------------
     public static final int MILLI_PAR_MINUTE = 60000;
     public static final String CHEMIN = "metronome.wav";
+    public static final int BATTEMENTS_DE_DEPART = 3;
 
     //-----------------------------------
     // ATTRIBUTS D'INSTANCE
@@ -34,6 +35,8 @@ public class Metronome {
     private int tempsBattement;
     private int toursSilence;
     private boolean aleatoire;
+    private int minRandom;
+    private int maxRandom;
 
     //Variables pour la gestion du son
     private AudioInputStream audioStream;
@@ -88,6 +91,20 @@ public class Metronome {
     public void setAleatoire(boolean aleatoire) {
         this.aleatoire = aleatoire;
     }
+
+    /**
+     * Permet de modifier le nombre de battements minimum dans le choix de
+     * l'aleatoire.
+     * @param minRandom le nombre minimum de battements sautes en mode aleatoire
+     */
+    public void setMinRandom(int minRandom) {this.minRandom = minRandom;}
+
+    /**
+     * Permet de modifier le nombre de battements maximum dans le choix de
+     * l'aleatoire.
+     * @param maxRandom le nombre maximum de battements sautes en mode aleatoire
+     */
+    public void setMaxRandom(int maxRandom) {this.maxRandom = maxRandom;}
 
     /**
      * Methode pour demarre l'emission de battements selon les parametres donnes.
@@ -189,21 +206,21 @@ public class Metronome {
         int toursSonores = 1;
         boolean sonore = true;
         Random random = new Random();
-        int i = 3;
+        int i = BATTEMENTS_DE_DEPART;
 
         while (!synchroniseur.isShutdown()) {
             if (i == 0) {
                 if (sonore) {
                     baisserVolume();
                     if (aleatoire) {
-                        toursSilence = random.nextInt(2,10);
+                        toursSilence = random.nextInt(minRandom,maxRandom);
                     }
                     i = toursSilence;
                     sonore = false;
                 } else {
                     monterVolume();
                     if (aleatoire) {
-                        toursSonores = random.nextInt(2,10);
+                        toursSonores = random.nextInt(minRandom,maxRandom);
                     }
                     i = toursSonores;
                     sonore = true;
